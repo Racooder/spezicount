@@ -1,0 +1,32 @@
+{
+    "name": "spezicounter",
+    "module": "index.ts",
+    "type": "module",
+    "private": true,
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/express": "^5.0.6",
+        "@types/node": "^25.2.3",
+        "@types/pg": "^8.16.0",
+        "prisma": "^7.4.0",
+        "tsup": "^8.5.1",
+        "tsx": "^4.21.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "@prisma/adapter-pg": "^7.4.0",
+        "@prisma/client": "^7.4.0",
+        "dotenv": "^17.3.1",
+        "express": "^5.2.1",
+        "pg": "^8.18.0"
+    },
+    "scripts": {
+        "migrate": "npx prisma migrate dev && npx prisma generate",
+        "view-db": "npx prisma studio",
+        "dev": "tsx src/index.ts",
+        "start": "node dist/index.js",
+        "build": "tsup src/index.ts --minify --format esm --out-dir dist"
+    }
+}
