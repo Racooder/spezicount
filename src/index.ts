@@ -10,12 +10,14 @@ import type { ApiUser } from "./generated/prisma/browser";
 const WWW_AUTHENTICATE_HEADER_VALUE = 'Basic realm="api"';
 
 const app = express();
+app.use(express.json());
 
 // * Authentication
 
-function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
+async function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
     const apiKey = req.query.api_key || req.headers["x-api-key"];
-    if (typeof apiKey !== "string" || !isAdminApiKey(apiKey)) {
+    if (typeof apiKey !== "string" || !await isAdminApiKey(apiKey)) {
+        console.warn(`Unauthorized access attempt to ${req.method} ${req.path} with API key:`, apiKey);
         return res.status(403).send("Admin API key required");
     }
     next();
@@ -47,48 +49,46 @@ app.use(auth);
 app.get("/", async (req, res) => {
     res.send({
         "api-users": {
-            "GET": "List API users (admin only)",
-            "POST": "Create API user (admin only)",
+            "GET (isAdmin: boolean, )": "List API users (admin only)",
+            "POST (isAdmin: boolean)": "Create API user (admin only)",
         },
         "api-users/:key": {
-            "GET": "Get API user by key (admin only)",
-            "PATCH": "Update API user by key (admin only)",
-            "DELETE": "Delete API user by key (admin only)",
+            "GET ()": "Get API user by key (admin only)",
+            "PATCH ()": "Update API user by key (admin only)",
+            "DELETE ()": "Delete API user by key (admin only)",
         },
         "users": {
-            "GET": "List users",
-            "POST": "Create user (admin only)",
+            "GET ()": "List users",
+            "POST ()": "Create user (admin only)",
         },
         "users/:id": {
-            "GET": "Get user by ID",
-            "DELETE": "Delete user by ID (admin only)",
+            "GET ()": "Get user by ID",
+            "DELETE ()": "Delete user by ID (admin only)",
         },
         "products": {
-            "GET": "List products",
-            "POST": "Create product (admin only)",
+            "GET ()": "List products",
+            "POST ()": "Create product (admin only)",
         },
         "products/:id": {
-            "GET": "Get product by ID",
-            "DELETE": "Delete product by ID (admin only)",
+            "GET ()": "Get product by ID",
+            "DELETE ()": "Delete product by ID (admin only)",
         },
         "orders": {
-            "GET": "List orders",
-            "POST": "Create order",
+            "GET ()": "List orders",
+            "POST ()": "Create order",
         },
         "orders/:id": {
-            "GET": "Get order by ID",
-            "DELETE": "Delete order by ID",
+            "GET ()": "Get order by ID",
+            "DELETE ()": "Delete order by ID",
         },
     });
 });
 
 // * API Users
 
-app.use("/api-users", requireAdmin);
-
-app.get("/api-users", async (req, res) => {
+app.get("/api-users", requireAdmin, async (req, res) => {
     const filter: ApiUserFilter = {
-        isAdmin: req.query.isAdmin ? req.query.isAdmin === "true" : undefined,
+        isAdmin: typeof req.query.isAdmin === "boolean" ? req.query.isAdmin : undefined,
         createdBefore: req.query.createdBefore ? new Date(req.query.createdBefore as string) : undefined,
         createdAfter: req.query.createdAfter ? new Date(req.query.createdAfter as string) : undefined,
         lastLoginBefore: req.query.lastLoginBefore ? new Date(req.query.lastLoginBefore as string) : undefined,
@@ -99,7 +99,7 @@ app.get("/api-users", async (req, res) => {
     res.json(apiUsers);
 });
 
-app.get("/api-users/:key", async (req, res) => {
+app.get("/api-users/:key", requireAdmin, async (req, res) => {
     const key = req.params.key;
     if (typeof key !== "string") {
         return res.status(400).send("Invalid API key");
@@ -112,8 +112,14 @@ app.get("/api-users/:key", async (req, res) => {
     res.json(apiUser);
 });
 
-app.post("/api-users", async (req, res) => {
+app.post("/api-users", requireAdmin, async (req, res) => {
+    console.log(req.body);
+    if (typeof req.body !== "object") {
+        return res.status(400).send("Invalid request body");
+    }
+
     const isAdmin = req.body.isAdmin;
+    console.log("isAdmin:", isAdmin, "type:", typeof isAdmin);
 
     if (typeof isAdmin !== "boolean") {
         return res.status(400).send("Invalid isAdmin value");
@@ -130,10 +136,15 @@ app.post("/api-users", async (req, res) => {
     }
 });
 
-app.patch("/api-users/:key", async (req, res) => {
+app.patch("/api-users/:key", requireAdmin, async (req, res) => {
     const key = req.params.key;
     if (typeof key !== "string") {
         return res.status(400).send("Invalid API key");
+    }
+
+    console.log(req.body);
+    if (typeof req.body !== "object") {
+        return res.status(400).send("Invalid request body");
     }
 
     const updates: Partial<Omit<ApiUser, "id" | "key">> = {};
@@ -159,7 +170,7 @@ app.patch("/api-users/:key", async (req, res) => {
     }
 });
 
-app.delete("/api-users/:key", async (req, res) => {
+app.delete("/api-users/:key", requireAdmin, async (req, res) => {
     const key = req.params.key;
     if (typeof key !== "string") {
         return res.status(400).send("Invalid API key");
@@ -198,6 +209,11 @@ app.get("/users/:id", async (req, res) => {
 });
 
 app.post("/users", requireAdmin, async (req, res) => {
+    console.log(req.body);
+    if (typeof req.body !== "object") {
+        return res.status(400).send("Invalid request body");
+    }
+
     const name = req.body.name;
     if (typeof name !== "string" || name.trim() === "") {
         return res.status(400).send("Invalid user name");
@@ -251,6 +267,11 @@ app.get("/products/:id", async (req, res) => {
 });
 
 app.post("/products", requireAdmin, async (req, res) => {
+    console.log(req.body);
+    if (typeof req.body !== "object") {
+        return res.status(400).send("Invalid request body");
+    }
+
     const name = req.body.name;
     const price = req.body.price;
 
@@ -316,6 +337,11 @@ app.get("/orders/:id", async (req, res) => {
 });
 
 app.post("/orders", async (req, res) => {
+    console.log(req.body);
+    if (typeof req.body !== "object") {
+        return res.status(400).send("Invalid request body");
+    }
+
     const productId = req.body.productId;
     const userId = req.body.userId;
 
