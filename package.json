@@ -21,6 +21,7 @@
 	"scripts": {
 		"db": "docker compose up -d",
 		"migrate": "bun --bun run prisma migrate dev && bun --bun run prisma generate",
-		"dev": "bun --watch src/index.ts"
+		"dev": "bun --watch src/index.ts",
+		"run": "bun run src/index.ts"
 	}
 }
