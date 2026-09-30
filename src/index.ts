@@ -4,7 +4,7 @@ import { productRoutes } from "./features/products/routes";
 import { transactionRoutes } from "./features/transactions/routes";
 import { userRoutes } from "./features/users/routes";
 
-const app = new Elysia()
+const app = new Elysia({ prefix: "/api" })
 	.use(
 		swagger({
 			path: "/swagger",

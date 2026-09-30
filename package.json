@@ -6,6 +6,8 @@
 	"devDependencies": {
 		"@types/bun": "latest",
 		"@types/pg": "^8.20.0",
+		"dotenv": "^18.0.5",
+		"dotenv-expand": "^1000.0.0",
 		"prisma": "^7.9.1"
 	},
 	"peerDependencies": {
