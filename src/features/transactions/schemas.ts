@@ -16,10 +16,3 @@ export const UpopulatedTransactionSchema = t.Object({
 	productId: t.String(),
 	quantity: t.Integer(),
 });
-
-export const UserTransactionSchema = t.Object({
-	id: t.String(),
-	product: ProductSchema,
-	quantity: t.Integer(),
-	createdAt: t.Date(),
-});
