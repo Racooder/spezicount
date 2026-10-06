@@ -1,4 +1,8 @@
 import Elysia, { t } from "elysia";
+import type {
+	DateTimeFilter,
+	TransactionWhereInput,
+} from "../../../generated/prisma/models";
 import { db } from "../../db";
 import { ErrorResponseSchema } from "../shared/schemas";
 import { TransactionSchema, UpopulatedTransactionSchema } from "./schemas";
@@ -6,16 +10,41 @@ import { TransactionSchema, UpopulatedTransactionSchema } from "./schemas";
 export const transactionRoutes = new Elysia({ prefix: "/transactions" })
 	.get(
 		"/",
-		async () => {
+		async ({ query }) => {
+			const where: TransactionWhereInput = {};
+			const dateFilter: DateTimeFilter = {};
+			if (query.quantity) where.quantity = query.quantity;
+			if (query.userId) where.userId = query.userId;
+			if (query.productId) where.productId = query.productId;
+			if (query.createdBefore) dateFilter.lte = query.createdBefore;
+			if (query.createdAfter) dateFilter.gte = query.createdAfter;
+			if (Object.keys(dateFilter).length > 0) where.createdAt = dateFilter;
+
 			return await db.transaction.findMany({
-				include: {
-					user: true,
+				where,
+				select: {
+					id: true,
+					quantity: true,
+					createdAt: true,
+					user: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
 					product: true,
 				},
 				orderBy: { createdAt: "desc" },
 			});
 		},
 		{
+			query: t.Object({
+				quantity: t.Optional(t.Integer()),
+				userId: t.Optional(t.String()),
+				productId: t.Optional(t.String()),
+				createdBefore: t.Optional(t.Date()),
+				createdAfter: t.Optional(t.Date()),
+			}),
 			detail: {
 				summary: "Get all transactions",
 				description:
