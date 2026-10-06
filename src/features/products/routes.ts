@@ -32,7 +32,7 @@ export const productRoutes = new Elysia({ prefix: "/products" })
 			},
 			body: t.Object({
 				name: t.String(),
-				priceInCents: t.Integer(),
+				priceInCents: t.Optional(t.Integer()),
 			}),
 			response: ProductSchema,
 		},
