@@ -56,7 +56,7 @@ export const transactionRoutes = new Elysia({ prefix: "/transactions" })
 			body: t.Object({
 				userId: t.String(),
 				productId: t.String(),
-				quantity: t.Optional(t.Number()),
+				quantity: t.Optional(t.Integer()),
 			}),
 			response: {
 				200: UpopulatedTransactionSchema,
