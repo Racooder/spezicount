@@ -1,7 +1,11 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { ErrorResponseSchema } from "../shared/schemas";
-import { PublicUserSchema, UserWithTransactionsSchema } from "./schemas";
+import {
+	PublicUserSchema,
+	UserSchema,
+	UserWithTransactionsSchema,
+} from "./schemas";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
 	.get(
@@ -9,6 +13,10 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 		async () => {
 			return await db.user.findMany({
 				orderBy: { createdAt: "desc" },
+				select: {
+					id: true,
+					name: true,
+				},
 			});
 		},
 		{
@@ -67,7 +75,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 				id: t.String({ summary: "User UUID" }),
 			}),
 			response: {
-				200: PublicUserSchema,
+				200: UserSchema,
 				404: ErrorResponseSchema,
 			},
 		},
@@ -84,7 +92,10 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 					isAdmin: true,
 					createdAt: true,
 					transactions: {
-						include: {
+						select: {
+							id: true,
+							quantity: true,
+							createdAt: true,
 							product: true,
 						},
 					},
