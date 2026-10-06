@@ -28,7 +28,6 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 			response: t.Array(PublicUserSchema),
 		},
 	)
-
 	.post(
 		"/",
 		async ({ body }) => {
@@ -50,7 +49,6 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 			response: PublicUserSchema,
 		},
 	)
-
 	.get(
 		"/:id",
 		async ({ params, set }) => {
@@ -67,7 +65,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 		},
 		{
 			detail: {
-				summary: "Get a user details",
+				summary: "Get a user's details",
 				description: "Returns details of the user with the specified UUID.",
 				tags: ["Users"],
 			},
@@ -80,7 +78,6 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 			},
 		},
 	)
-
 	.get(
 		"/:id/transactions",
 		async ({ params, set }) => {
@@ -111,7 +108,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 		},
 		{
 			detail: {
-				summary: "Get a user transactions",
+				summary: "Get a user's transactions",
 				description:
 					"Returns the transactions of the user with the specified UUID.",
 				tags: ["Users"],

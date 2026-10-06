@@ -13,13 +13,14 @@ model User {
     token        String        @unique @default(uuid())
     isAdmin      Boolean       @default(false)
     transactions Transaction[]
+    payments     Payment[]
     createdAt    DateTime      @default(now())
 }
 
 model Product {
     id           String        @id @default(uuid())
     name         String
-    priceInCents Int           @default(-1)
+    priceInCents Int           @default(0)
     transactions Transaction[]
 }
 
@@ -31,4 +32,12 @@ model Transaction {
     productId String
     quantity  Int      @default(1)
     createdAt DateTime @default(now())
+}
+
+model Payment {
+    id            String   @id @default(uuid())
+    user          User     @relation(fields: [userId], references: [id])
+    userId        String
+    amountInCents Int
+    createdAt     DateTime @default(now())
 }
