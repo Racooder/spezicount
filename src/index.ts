@@ -1,5 +1,6 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
+import { paymentRoutes } from "./features/payments/routes";
 import { productRoutes } from "./features/products/routes";
 import { transactionRoutes } from "./features/transactions/routes";
 import { userRoutes } from "./features/users/routes";
@@ -17,6 +18,7 @@ const app = new Elysia({ prefix: "/api" })
 			},
 		}),
 	)
+	.use(paymentRoutes)
 	.use(productRoutes)
 	.use(transactionRoutes)
 	.use(userRoutes)
